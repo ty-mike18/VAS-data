@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>VASスコア入力</title>
+    <style>
+        :root {
+            --primary: #2c6e91;
+            --bg: #f8f9fa;
+            --card: #ffffff;
+            --text: #222;
+            --muted: #666;
+            --radius: 16px;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Hiragino Sans', 'Yu Gothic', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            padding: 24px 16px 48px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        header h1 {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        header p {
+            font-size: 0.85rem;
+            color: var(--muted);
+            margin-top: 4px;
+        }
+
+        /* 参加者ID入力 */
+        .id-section {
+            background: var(--card);
+            border-radius: var(--radius);
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+        }
+
+        .id-section label {
+            font-size: 0.9rem;
+            font-weight: 600;
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .id-section input {
+            width: 100%;
+            padding: 10px 14px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.2s;
+        }
+
+        .id-section input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        /* VASカード */
+        .vas-card {
+            background: var(--card);
+            border-radius: var(--radius);
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+        }
+
+        .vas-card h2 {
+            font-size: 1rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: var(--text);
+            line-height: 1.5;
+        }
+
+        .slider-wrapper {
+            position: relative;
+            padding: 0 4px;
+        }
+
+        /* スライダー本体 */
+        input[type="range"] {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: linear-gradient(to right, var(--primary) 0%, var(--primary) 50%, #dde3ea 50%, #dde3ea 100%);
+            outline: none;
+            cursor: pointer;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: var(--primary);
+            border: 3px solid #fff;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+            cursor: pointer;
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: var(--primary);
+            border: 3px solid #fff;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+            cursor: pointer;
+        }
+
+        /* 左右ラベル */
+        .vas-labels {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+        }
+
+        .vas-labels span {
+            font-size: 0.78rem;
+            color: var(--muted);
+            text-align: center;
+            max-width: 80px;
+            line-height: 1.3;
+        }
+
+        /* スコア表示 */
+        .score-display {
+            text-align: center;
+            margin-top: 12px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        /* 保存ボタン */
+        #save-btn {
+            display: block;
+            width: 100%;
+            padding: 16px;
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            border-radius: var(--radius);
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 24px;
+            letter-spacing: 0.05em;
+            transition: background 0.2s, transform 0.1s;
+        }
+
+        #save-btn:active {
+            transform: scale(0.98);
+            background: #1a4f6e;
+        }
+
+        #save-btn:disabled {
+            background: #aaa;
+            cursor: not-allowed;
+        }
+
+        /* ステータス */
+        #status {
+            text-align: center;
+            margin-top: 16px;
+            font-size: 0.9rem;
+            min-height: 1.5em;
+            font-weight: 600;
+        }
+
+        .status-ok   { color: #2e7d32; }
+        .status-err  { color: #c62828; }
+        .status-wait { color: var(--muted); }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>主観的状態の記録</h1>
+    <p>スライダーを動かして現在の状態を入力し、保存してください</p>
+</header>
+
+<!-- 参加者ID -->
+<div class="id-section">
+    <label for="participant-id">参加者ID（研究者から伝えられた番号）</label>
+    <input type="text" id="participant-id" placeholder="例: P001" autocomplete="off">
+</div>
+
+<!-- 満腹感 -->
+<div class="vas-card">
+    <h2>今、どのくらい満腹ですか？</h2>
+    <div class="slider-wrapper">
+        <input type="range" min="0" max="100" step="0.1" value="50"
+               id="satiety-slider" class="vas-slider" data-target="satiety-value">
+    </div>
+    <div class="vas-labels">
+        <span>まったく<br>満腹でない</span>
+        <span>かなり<br>満腹である</span>
+    </div>
+    <div class="score-display">値: <span id="satiety-value">50.0</span></div>
+</div>
+
+<!-- 空腹感 -->
+<div class="vas-card">
+    <h2>今、どのくらい空腹ですか？</h2>
+    <div class="slider-wrapper">
+        <input type="range" min="0" max="100" step="0.1" value="50"
+               id="hunger-slider" class="vas-slider" data-target="hunger-value">
+    </div>
+    <div class="vas-labels">
+        <span>まったく<br>空腹でない</span>
+        <span>かなり<br>空腹である</span>
+    </div>
+    <div class="score-display">値: <span id="hunger-value">50.0</span></div>
+</div>
+
+<!-- 眠気 -->
+<div class="vas-card">
+    <h2>今、どのくらい眠いですか？</h2>
+    <div class="slider-wrapper">
+        <input type="range" min="0" max="100" step="0.1" value="50"
+               id="sleepiness-slider" class="vas-slider" data-target="sleepiness-value">
+    </div>
+    <div class="vas-labels">
+        <span>まったく<br>眠くない</span>
+        <span>非常に<br>眠い</span>
+    </div>
+    <div class="score-display">値: <span id="sleepiness-value">50.0</span></div>
+</div>
+
+<button id="save-btn">記録を保存する</button>
+<p id="status"></p>
+
+<script>
+    // =====================================================
+    // ★ここを自分のGoogle Apps ScriptのURLに変更してください
+    // =====================================================
+    const GAS_URL = "https://script.google.com/macros/s/https://script.google.com/a/macros/toyo.jp/s/AKfycbwD2p0Uz7-K4cJtiZC7kBmsJi0T9Lxaq8Z3neKF9UjD_bwcD47hx7ZBgoDv7N8AIYBY0A/exec/exec";
+
+    // スライダーの動的更新
+    document.querySelectorAll(".vas-slider").forEach(slider => {
+        const targetId = slider.dataset.target;
+        const display  = document.getElementById(targetId);
+
+        const updateSlider = () => {
+            const val = parseFloat(slider.value);
+            display.textContent = val.toFixed(1);
+            // グラデーション更新
+            slider.style.background =
+                `linear-gradient(to right, var(--primary) 0%, var(--primary) ${val}%, #dde3ea ${val}%, #dde3ea 100%)`;
+        };
+
+        slider.addEventListener("input", updateSlider);
+        updateSlider(); // 初期化
+    });
+
+    // タイムスタンプ生成
+    function getTimestamp() {
+        const now = new Date();
+        const pad = n => String(n).padStart(2, "0");
+        return `${now.getFullYear()}${pad(now.getMonth()+1)}${pad(now.getDate())}_${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
+    }
+
+    // 保存処理
+    document.getElementById("save-btn").addEventListener("click", async () => {
+        const participantId = document.getElementById("participant-id").value.trim();
+        const statusEl      = document.getElementById("status");
+        const btn           = document.getElementById("save-btn");
+
+        if (!participantId) {
+            statusEl.textContent = "⚠ 参加者IDを入力してください";
+            statusEl.className   = "status-err";
+            return;
+        }
+
+        btn.disabled         = true;
+        statusEl.textContent = "送信中...";
+        statusEl.className   = "status-wait";
+
+        const payload = {
+            participantId: participantId,
+            timestamp:     getTimestamp(),
+            satiety:       document.getElementById("satiety-slider").value,
+            hunger:        document.getElementById("hunger-slider").value,
+            sleepiness:    document.getElementById("sleepiness-slider").value
+        };
+
+        try {
+            // GASはno-corsでPOSTする（レスポンス本文は読めないがデータは届く）
+            await fetch(GAS_URL, {
+                method:  "POST",
+                mode:    "no-cors",
+                headers: { "Content-Type": "application/json" },
+                body:    JSON.stringify(payload)
+            });
+
+            statusEl.textContent = "✅ 保存が完了しました。ありがとうございました。";
+            statusEl.className   = "status-ok";
+
+        } catch (err) {
+            statusEl.textContent = "❌ 通信エラーが発生しました。Wi-Fiや電波の状態を確認してください。";
+            statusEl.className   = "status-err";
+        } finally {
+            btn.disabled = false;
+        }
+    });
+</script>
+</body>
+</html>
